@@ -1,9 +1,9 @@
-db.auth('admin-user', 'password')
-
+db.auth('admin', 'password')
 db = db.getSiblingDB('featureTable')
+db.createCollection("features");
 
 db.createUser({
-    user: 'admin',
+    user: 'featureAdmin',
     pwd: 'password',
     roles: [
         {
@@ -12,5 +12,3 @@ db.createUser({
         },
     ],
 });
-
-db.featureTable.insert({})
