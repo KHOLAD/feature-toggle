@@ -11,8 +11,12 @@ import (
 
 const (
 	connectionString = "mongodb://admin:password@datastore:27017/featureTable/?authSource=admin"
-	database         = "featureTable"
-	features         = "features"
+	// Database - main feature table database
+	Database = "featureTable"
+	// FeaturesCollection - collection name
+	FeaturesCollection = "features"
+	// CustomersCollection - collection name
+	CustomersCollection = "customers"
 )
 
 var mongoInstance *mongo.Client
