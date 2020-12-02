@@ -18,10 +18,14 @@ func main() {
 
 	// Echo instance
 	e := echo.New()
+	e.HideBanner = true
 
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	// Custom Error handler
+	e.HTTPErrorHandler = handlers.CustomHTTPErrorHandler
 
 	// Routes
 	e.POST("/feature", handlers.CreateFeature)

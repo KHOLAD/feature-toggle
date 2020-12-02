@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/KHOLAD/feature-toggle-api/models"
@@ -15,43 +15,52 @@ import (
 // CreateFeature - POST request creation handler
 func CreateFeature(c echo.Context) (err error) {
 	f := new(models.Feature)
-	f.ID = primitive.NewObjectID()
-
 	if err = c.Bind(f); err != nil {
-		return
+		return err
 	}
+
+	err = f.Validate()
+	if err != nil {
+		return models.NewHTTPError(http.StatusBadRequest, "BadRequest", err.Error())
+	}
+
 	// Get mongo client
 	mongoclient, _ := mongo.GetClient()
-	// Insert new feature to collection
-	featureCollection := mongoclient.Database(mongo.Database).Collection(mongo.FeaturesCollection)
-	_, err = featureCollection.InsertOne(context.TODO(), f)
+
+	// Insert new feature to collection with new object ID
+	f.ID = primitive.NewObjectID()
+	featCol := mongoclient.Database(mongo.Database).Collection(mongo.FeaturesCollection)
+	found, err := featCol.CountDocuments(context.TODO(), bson.M{"technicalName": f.TechnicalName})
 	if err != nil {
-		log.Fatal(err)
-		return
+		em := fmt.Sprintf("Cannot validate document for feature with [%v].", f.TechnicalName)
+		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+	}
+	if found >= 1 {
+		em := fmt.Sprintf("Feature with [%v - %v] already exist.", f.TechnicalName, f.ID.Hex())
+		return models.NewHTTPError(http.StatusBadRequest, "BadRequest", em)
+	}
+
+	_, err = featCol.InsertOne(context.TODO(), f)
+	if err != nil {
+		em := fmt.Sprintf("Cannot insert feature with [%v].", f.TechnicalName)
+		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
 	}
 
 	// Gets customers collection and update with new feature
-	customersCollection := mongoclient.Database(mongo.Database).Collection(mongo.CustomersCollection)
+	cusColl := mongoclient.Database(mongo.Database).Collection(mongo.CustomersCollection)
 	for _, cID := range f.CustomerIds {
-		userEntity := models.UserFeature{
-			Name:     f.TechnicalName,
-			Active:   false,
-			Inverted: f.Inverted,
-			Expired:  false,
-		}
+		findBy := bson.M{"_id": cID}
+		change := bson.M{"$push": bson.M{"features": models.GetUserEntity(f)}}
 
-		findBy := bson.M{"customerId": cID}
-		change := bson.M{"$push": bson.M{"features": userEntity}}
-
-		res := customersCollection.FindOneAndUpdate(
+		res := cusColl.FindOneAndUpdate(
 			context.TODO(),
 			findBy,
 			change,
 		)
 
 		if res.Err() != nil {
-			log.Fatal(res.Err())
-			return res.Err()
+			em := fmt.Sprintf("Cannot find and insert feature [%v] for customer [%v].", f.TechnicalName, cID.Hex())
+			return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
 		}
 	}
 

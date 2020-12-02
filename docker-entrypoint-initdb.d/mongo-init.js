@@ -1,26 +1,11 @@
 db.auth('admin', 'password');
 db = db.getSiblingDB('featureTable');
 
-db.createCollection("customers");
-db.createCollection("features");
+const collections = ['customers', 'features'];
 
-db.runCommand(
-    {
-        insert: "customers",
-        documents: [
-            {
-                _id: "1",
-                name: "Swiss",
-                features: []
-            },
-            {
-                _id: "2",
-                name: "C.T.co",
-                features: []
-            }
-        ]
-    }
-)
+collections.forEach((col) => {
+    db.createCollection(col)
+})
 
 db.createUser({
     user: 'featureAdmin',
@@ -32,3 +17,19 @@ db.createUser({
         },
     ],
 });
+
+db.runCommand(
+    {
+        insert: "customers",
+        documents: [
+            {
+                name: "SwissCo",
+                features: []
+            },
+            {
+                name: "C.T.co",
+                features: []
+            }
+        ]
+    }
+)
