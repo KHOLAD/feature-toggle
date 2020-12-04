@@ -23,12 +23,18 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:4200"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	// Custom Error handler
 	e.HTTPErrorHandler = handlers.CustomHTTPErrorHandler
 
 	// Routes
+	e.GET("/features", handlers.GetFeatures)
 	e.POST("/feature", handlers.CreateFeature)
+	e.PUT("/feature/:id", handlers.UpdateFeature)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))

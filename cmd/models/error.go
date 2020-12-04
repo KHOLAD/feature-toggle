@@ -2,7 +2,7 @@ package models
 
 // HTTPError - custom http error type
 type HTTPError struct {
-	Code    int
+	Code    int    `json:"code"`
 	Key     string `json:"error"`
 	Message string `json:"message"`
 }

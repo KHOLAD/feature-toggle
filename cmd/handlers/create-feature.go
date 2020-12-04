@@ -25,7 +25,11 @@ func CreateFeature(c echo.Context) (err error) {
 	}
 
 	// Get mongo client
-	mongoclient, _ := mongo.GetClient()
+	mongoclient, err := mongo.GetClient()
+	if err != nil {
+		em := "Cannot get client from Database"
+		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+	}
 
 	// Insert new feature to collection with new object ID
 	f.ID = primitive.NewObjectID()
@@ -50,17 +54,19 @@ func CreateFeature(c echo.Context) (err error) {
 	cusColl := mongoclient.Database(mongo.Database).Collection(mongo.CustomersCollection)
 	for _, cID := range f.CustomerIds {
 		findBy := bson.M{"_id": cID}
-		change := bson.M{"$push": bson.M{"features": models.GetUserEntity(f)}}
+		change := bson.M{
+			"$push": bson.M{"features": models.GetUserEntity(f)},
+		}
 
-		res := cusColl.FindOneAndUpdate(
+		_, err = cusColl.UpdateOne(
 			context.TODO(),
 			findBy,
 			change,
 		)
 
-		if res.Err() != nil {
+		if err != nil {
 			em := fmt.Sprintf("Cannot find and insert feature [%v] for customer [%v].", f.TechnicalName, cID.Hex())
-			return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+			return models.NewHTTPError(http.StatusBadRequest, "BadRequest", em)
 		}
 	}
 

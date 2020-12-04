@@ -13,13 +13,13 @@ var syncOnce sync.Once
 
 // Feature - main feature entity type
 type Feature struct {
-	ID            primitive.ObjectID   `bson:"_id" json:"_id,omitempty"`
-	DisplayName   string               `json:"displayName" bson:"displayName" validate:"required,min=3"`
+	ID            primitive.ObjectID   `json:"id,omitempty" bson:"_id"`
+	DisplayName   string               `json:"displayName,omitempty" bson:"displayName" validate:"required,min=3"`
 	TechnicalName string               `json:"technicalName" bson:"technicalName" validate:"required,min=3"`
 	ExpiresOn     time.Time            `json:"expiresOn,omitempty" bson:"expiresOn"`
-	Description   string               `json:"description" bson:"description" validate:"max=10"`
+	Description   string               `json:"description,omitempty" bson:"description" validate:"max=100"`
 	Inverted      bool                 `json:"inverted" bson:"inverted"`
-	CustomerIds   []primitive.ObjectID `json:"customerIds,omitempty" validate:"required,min=1"`
+	CustomerIds   []primitive.ObjectID `json:"customerIds,omitempty" bson:"customerIds" validate:"required,min=1"`
 }
 
 // UserFeature - user feature entity type
@@ -35,7 +35,7 @@ func GetUserEntity(f *Feature) UserFeature {
 	return UserFeature{
 		Name:     f.TechnicalName,
 		Active:   false,
-		Inverted: f.Inverted,
+		Inverted: false,
 		Expired:  false,
 	}
 }
