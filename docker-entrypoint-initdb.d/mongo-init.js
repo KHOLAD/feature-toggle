@@ -27,7 +27,7 @@ db.runCommand(
                 features: []
             },
             {
-                name: "C.T.co",
+                name: "Spotify",
                 features: []
             }
         ]

@@ -27,8 +27,7 @@ func CreateFeature(c echo.Context) (err error) {
 	// Get mongo client
 	mongoclient, err := mongo.GetClient()
 	if err != nil {
-		em := "Cannot get client from Database"
-		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+		return mongo.GetClientError()
 	}
 
 	// Insert new feature to collection with new object ID

@@ -12,15 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func containsID(s []primitive.ObjectID, e primitive.ObjectID) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 // UpdateFeature - update certain feature
 func UpdateFeature(c echo.Context) (err error) {
 	f := new(models.Feature)
@@ -42,8 +33,7 @@ func UpdateFeature(c echo.Context) (err error) {
 
 	mongoclient, err := m.GetClient()
 	if err != nil {
-		em := "Cannot get client from Database"
-		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+		return m.GetClientError()
 	}
 
 	f.ID = docID
@@ -68,8 +58,7 @@ func UpdateFeature(c echo.Context) (err error) {
 	)
 
 	if err != nil {
-		fmt.Println(err)
-		em := fmt.Sprintf("Cannot update feature [%v - %v].", f.TechnicalName, id)
+		em := fmt.Sprintf("Cannot update feature [%v] with [%v].", f.TechnicalName, id)
 		return models.NewHTTPError(http.StatusBadRequest, "BadRequest", em)
 	}
 

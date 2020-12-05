@@ -3,8 +3,10 @@ package mongo
 import (
 	"context"
 	"log"
+	"net/http"
 	"sync"
 
+	"github.com/KHOLAD/feature-toggle-api/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -38,4 +40,10 @@ func GetClient() (*mongo.Client, error) {
 		mongoInstance = client
 	})
 	return mongoInstance, connectionError
+}
+
+// GetClientError - default mongo client error
+func GetClientError() *models.HTTPError {
+	em := "Cannot get client from Database"
+	return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
 }

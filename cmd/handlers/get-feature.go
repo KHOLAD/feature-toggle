@@ -14,8 +14,7 @@ import (
 func GetFeatures(c echo.Context) (err error) {
 	mongoclient, err := mongo.GetClient()
 	if err != nil {
-		em := "Cannot get client from Database"
-		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
+		return mongo.GetClientError()
 	}
 
 	featCol := mongoclient.Database(mongo.Database).Collection(mongo.FeaturesCollection)
@@ -28,7 +27,7 @@ func GetFeatures(c echo.Context) (err error) {
 
 	var features []models.Feature
 	if err = cur.All(context.TODO(), &features); err != nil {
-		em := "Cannot read documents from collection"
+		em := "Cannot read documents from feature collection"
 		return models.NewHTTPError(http.StatusInternalServerError, "InternalServerError", em)
 	}
 

@@ -32,9 +32,12 @@ func main() {
 	e.HTTPErrorHandler = handlers.CustomHTTPErrorHandler
 
 	// Routes
-	e.GET("/features", handlers.GetFeatures)
-	e.POST("/feature", handlers.CreateFeature)
-	e.PUT("/feature/:id", handlers.UpdateFeature)
+	e.GET("api/features", handlers.GetFeatures)
+	e.POST("api/feature", handlers.CreateFeature)
+	e.PUT("api/feature/:id", handlers.UpdateFeature)
+	e.GET("api/customers", handlers.GetAllCustomers)
+	e.GET("api/customer/:id", handlers.GetCustomerFeatures)
+	e.PUT("api/toggle/:customerId/:name", handlers.ToggleFeature)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
